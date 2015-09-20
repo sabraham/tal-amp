@@ -22,8 +22,8 @@ class Episode:
         self.title = d(".node-title").text().encode('ascii', 'ignore')
         self.description = d(".description").text().encode('ascii', 'ignore')
         self.date = d(".date").text().encode('ascii', 'ignore')
-        latest_ep = 548
-        if ep_no < latest_ep - 5:
+        latest_ep = 543
+        if ep_no < latest_ep:
             self.podcast_url = "http://audio.thisamericanlife.org/jomamashouse/ismymamashouse/{0}.mp3".format(ep_no)
         else:
             self.podcast_url = "http://www.podtrac.com/pts/redirect.mp3/podcast.thisamericanlife.org/clean/{0}.mp3".format(ep_no)
@@ -78,10 +78,12 @@ def TAL(height, width):
     A(0, height,     height, width)
     L(0, height * 2, height, width)
 
-def ira(begin_x, height, width):
+def ira(begin_x, height, width, ep):
     win = curses.newwin(height, width, 0, begin_x)
     win.attron(curses.color_pair(1))
-    win.bkgd(' ', curses.color_pair(1))
+    curses.init_pair(20, 141, 141)
+    #win.bkgd(' ', curses.color_pair(1))
+    win.bkgd(' ', curses.color_pair(20))
     # begin glasses
     curses.init_pair(17, curses.COLOR_WHITE, curses.COLOR_BLACK)
     y = 8
@@ -122,13 +124,31 @@ def ira(begin_x, height, width):
     win.addstr(y + 1, x + 11, " " * 5, curses.color_pair(18))
     # end forehead
     # begin hair
-    curses.init_pair(9, curses.COLOR_WHITE, 233)
-    for i in xrange(-4,-2):
-        win.addstr(y + i, x + 5, " " * 17, curses.color_pair(9))
-    win.addstr(y + -2, x + 13, " " * 1, curses.color_pair(9))
-    for i in xrange(-4, 1):
-        win.addstr(y + i, x + 5, " " * 1, curses.color_pair(9))
-        win.addstr(y + i, x + 21, " " * 1, curses.color_pair(9))
+    curses.init_pair(10, 253, curses.COLOR_WHITE)
+    if ep:
+        year = int(ep.date[-4:].strip())
+        units = (year - 1995) / 4
+        curses.init_pair(9, curses.COLOR_WHITE, 233)
+        for i in xrange(-4,-2):
+            win.addstr(y + i, x + 5, " " * 17, curses.color_pair(9))
+        win.addstr(y + -2, x + 13, " " * 1, curses.color_pair(9))
+        for i in xrange(-4, 1 - units):
+            col = curses.color_pair(9)
+            win.addstr(y + i, x + 5, " " * 1, col)
+            win.addstr(y + i, x + 21, " " * 1, col)
+        for i in xrange(1 - units, 1):
+            col = curses.color_pair(1)
+            win.addstr(y + i, x + 5, " " * 1, col)
+            win.addstr(y + i, x + 21, " " * 1, col)
+
+    else:
+        curses.init_pair(9, curses.COLOR_WHITE, 233)
+        for i in xrange(-4,-2):
+            win.addstr(y + i, x + 5, " " * 17, curses.color_pair(9))
+        win.addstr(y + -2, x + 13, " " * 1, curses.color_pair(9))
+        for i in xrange(-4, 1):
+            win.addstr(y + i, x + 5, " " * 1, curses.color_pair(9))
+            win.addstr(y + i, x + 21, " " * 1, curses.color_pair(9))
     # begin lips/teeth
     win.addstr(y + 8, x + 7, ("| | " * 3) + '|' , curses.color_pair(19))
     # end lips/teeth
@@ -157,6 +177,9 @@ def console(begin_x, height, width, ep):
     win.refresh()
     return(win)
 
+def controls(begin_x, begin_y, height, width):
+    return(1)
+
 def main(screen):
     """our main function"""
     stdscr = curses.initscr()
@@ -168,7 +191,7 @@ def main(screen):
     curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_WHITE)
     curses.init_pair(4, curses.COLOR_BLUE, 56)
     TAL(8, 12)
-    ira(12, 24, 36)
+    ira(12, 24, 36, None)
     e = None
     con = console(48, 24, 40, None)
     while True:
@@ -177,6 +200,7 @@ def main(screen):
             s = stdscr.getstr()
             e = Episode(int(s))
             console(48, 24, 40, e)
+            ira(12, 24, 36, e)
             e.play()
         elif c == ord('q'):
             if e:
