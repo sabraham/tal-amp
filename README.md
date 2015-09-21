@@ -1,7 +1,7 @@
 # TAL-AMP
 A terminal TAL player
 
-Made at the [2015 TAL Audio Hackathon] (http://audiohackathon.com/).
+Made at the [2015 This American Life Audio Hackathon] (http://audiohackathon.com/).
 
 ## Features
 
@@ -50,3 +50,8 @@ surprise.
 * Terminal Apps are FUN
 * iTunes and Flash are TERRIBLE
 * The ~new web~ often leaves many behind (e.g., the visually-impaired)
+
+## License
+
+This is free software under the MIT license; see the LICENSE file for full
+details. Source code lives at [https://github.com/sabraham/tal-amp](https://github.com/sabraham/tal-amp).
