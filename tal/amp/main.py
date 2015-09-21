@@ -207,7 +207,7 @@ def controls(begin_x, begin_y, height, width):
     win.refresh()
     return(win)
 
-def main(screen):
+def main_(screen):
     """our main function"""
     stdscr = curses.initscr()
     curses.use_default_colors()
@@ -270,5 +270,8 @@ def main(screen):
         else:
             continue
 
+def main():
+    curses.wrapper(main_)
+
 if __name__ == '__main__':
-    curses.wrapper(main)
+    curses.wrapper(main_)
