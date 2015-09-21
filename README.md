@@ -16,6 +16,35 @@ and as episodes become more recent,
 Ira's hair grays appropriately.
 ![Episode 500](/screenshots/500.png)
 
+## Install
+
+There are 2 steps to install `tal-amp`.
+
+1. `tal-amp` is a `curses`  wrapper around `mpg123`, so let's get that first.
+
+MAC OS X: `brew install mpg123`
+Linux: `apt-get install mpg123`
+
+2. Install `tal-amp`.
+
+`python setup.py install`.
+
+## Running
+
+Now that you've installed `tal-amp`, all you need to do is enter
+
+`tal-amp`
+
+on your command line and it should start. To interact with the player, type one
+of the following characters:
+
+* `e` - Then enter which episode you want to tune into followed by `ENTER`.
+* `p` - Play or Pause the current episode.
+* `n` - Move on to the next episode; if `random` is `on`, then this will be a
+surprise.
+* `r` - Flip `random` episode selection on and off.
+* `q` - Quit `tal-amp`
+
 ## Rationale
 
 * Terminal Apps are FUN
