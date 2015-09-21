@@ -5,8 +5,11 @@ import subprocess
 from subprocess import Popen
 import os
 from pyquery import PyQuery as pq
+import signal
+from random import randint
 
 FNULL = open(os.devnull, 'w')
+RANDOM = False
 
 class Episode:
     def __init__(self, ep_no):
@@ -22,8 +25,8 @@ class Episode:
         self.title = d(".node-title").text().encode('ascii', 'ignore')
         self.description = d(".description").text().encode('ascii', 'ignore')
         self.date = d(".date").text().encode('ascii', 'ignore')
-        latest_ep = 543
-        if ep_no < latest_ep:
+        self.latest_ep = 543
+        if ep_no < self.latest_ep:
             self.podcast_url = "http://audio.thisamericanlife.org/jomamashouse/ismymamashouse/{0}.mp3".format(ep_no)
         else:
             self.podcast_url = "http://www.podtrac.com/pts/redirect.mp3/podcast.thisamericanlife.org/clean/{0}.mp3".format(ep_no)
@@ -35,6 +38,12 @@ class Episode:
         if self.process and not self.process.poll():
             self.process.terminate()
             return True
+    def next(self):
+        global RANDOM
+        if RANDOM:
+            return randint(1, self.latest_ep)
+        else:
+            return self.no + 1
 
 def T(begin_x, begin_y, height, width):
     win = curses.newwin(height, width, begin_y, begin_x)
@@ -178,7 +187,25 @@ def console(begin_x, height, width, ep):
     return(win)
 
 def controls(begin_x, begin_y, height, width):
-    return(1)
+    global RANDOM
+    win = curses.newwin(height, width, begin_y, begin_x)
+    win.attron(curses.color_pair(1))
+    win.bkgd(' ', curses.color_pair(1))
+    y = 0
+    x = 0
+    win.addstr(y + 1, x + 1, "E", curses.color_pair(5))
+    win.addstr(y + 1, x + 2, "P:")
+    win.addstr(y + 1, x + 9, "P", curses.color_pair(5))
+    win.addstr(y + 1, x + 10, "LAY/PAUSE")
+    win.addstr(y + 1, x + 20, "N", curses.color_pair(5))
+    win.addstr(y + 1, x + 21, "EXT")
+    rand_color = curses.color_pair(6) if RANDOM else curses.color_pair(0)
+    win.addstr(y + 1, x + 25, "R", curses.color_pair(5))
+    win.addstr(y + 1, x + 26, "ANDOM", rand_color)
+    win.addstr(y + 1, width - 5, "Q", curses.color_pair(5))
+    win.addstr(y + 1, width - 4, "UIT")
+    win.refresh()
+    return(win)
 
 def main(screen):
     """our main function"""
@@ -190,25 +217,56 @@ def main(screen):
     curses.init_pair(2, 0, 160)
     curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_WHITE)
     curses.init_pair(4, curses.COLOR_BLUE, 56)
+    curses.init_pair(5, curses.COLOR_WHITE, 197)
+    curses.init_pair(6, curses.COLOR_BLUE, curses.COLOR_WHITE)
     TAL(8, 12)
     ira(12, 24, 36, None)
     e = None
-    con = console(48, 24, 40, None)
+    con = console(48, 21, 40, None)
+    cntrls = controls(48, 21, 3, 40)
     while True:
+        global RANDOM
         c = stdscr.getch()
         if c == ord('e'):
-            s = stdscr.getstr()
+            c = stdscr.getch()
+            s = ''
+            i = 0
+            while c != ord('\n'):
+                s = s + chr(c)
+                cntrls.addstr(1, 4 + i, chr(c))
+                cntrls.refresh()
+                c = stdscr.getch()
+                i = i + 1
+            # reset controls
+            cntrls = controls(48, 21, 3, 40)
+            try:
+                int(s)
+            except ValueError, ex:
+                continue
+            if e:
+                e.stop()
             e = Episode(int(s))
-            console(48, 24, 40, e)
+            console(48, 21, 40, e)
             ira(12, 24, 36, e)
             e.play()
         elif c == ord('q'):
             if e:
                 e.stop()
             return(0)
-        elif c == ord(' '):
+        elif c == ord('p'):
             if e:
-                e.process.communicate(input=' ')
+                e.process.send_signal(signal.SIGUSR1)
+        elif c == ord('n'):
+            if e:
+                next = e.next()
+                e.stop()
+                e = Episode(next)
+                console(48, 21, 40, e)
+                ira(12, 24, 36, e)
+                e.play()
+        elif c == ord('r'):
+            RANDOM = not RANDOM
+            cntrls = controls(48, 21, 3, 40)
         else:
             continue
 
