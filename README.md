@@ -20,14 +20,11 @@ Ira's hair grays appropriately.
 
 There are 2 steps to install `tal-amp`.
 
-1. `tal-amp` is a `curses`  wrapper around `mpg123`, so let's get that first.
-
-MAC OS X: `brew install mpg123`
-Linux: `apt-get install mpg123`
-
-2. Install `tal-amp`.
-
-`python setup.py install`.
+1. `tal-amp` is a `curses`  wrapper around `mpg123`, so let's get that first
+  * MAC OS X: `brew install mpg123`
+  * Linux: `apt-get install mpg123`
+2. Install `tal-amp`
+  * `python setup.py install`
 
 ## Running
 
